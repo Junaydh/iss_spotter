@@ -19,8 +19,10 @@ const fetchCoordsByIp = function(ip, callback) {
   request(`http://ipwho.is/${ip}?fields=latitude,longitude`, (error, response, body) => {
     if (error) {
       return callback(error, null);
-    } else if (!JSON.parse(body).success) {
-      callback('Request failed! Invalid IP address', null);
+    } else if (response.statusCode !== 200) {
+      const msg = `Status Code ${response.statusCode} when fetching IP. Response: ${body}`;
+      callback(Error(msg), null);
+      return;
     } else {
       const coords = JSON.parse(body);
       callback(null, coords);
@@ -43,5 +45,26 @@ const fetchISSFlyOverTimes = function(coords, callback) {
   });
 };
 
+const nextISSTimesForMyLocation = function(callback) {
+  fetchMyIP((error, ip) => {
+    if (error) {
+        console.log("It didn't work!" , error);
+        return;
+      }
+      fetchCoordsByIp(ip, (error, coords) => {
+        if (error) {
+          console.log("It didn't work!", error)
+          return;
+        }
+        fetchISSFlyOverTimes(coords, (error, flyovers) => {
+          if (error) {
+            console.log("it didn't work!", error);
+          }
+          callback(null, flyovers);
+        })
+      })
+    });
+}
 
-module.exports = {fetchMyIP, fetchCoordsByIp, fetchISSFlyOverTimes};
+
+module.exports = {nextISSTimesForMyLocation};
