@@ -51,7 +51,7 @@ const printFlyovers = function(flyovers) {
 nextISSTimesForMyLocation((error, flyovers) => {
   if (error) {
     console.log(error);
-    console.log("It didn't worend!", error);
+    console.log("It didn't work!", error);
     return;
   }
   printFlyovers(flyovers);
