@@ -15,4 +15,15 @@ const fetchMyIP = function(callback) {
   });
 };
 
-module.exports = {fetchMyIP};
+const fetchCoordsByIp = function (ip, callback) {
+  request(`http://ipwho.is/${ip}?fields=latitude,longitude`, (error, response, body) => {
+    if (error) {
+      return callback(error, null);
+    } else {
+      const coords = JSON.parse(body);
+      callback(null, coords);
+    }
+  })
+}
+
+module.exports = {fetchMyIP, fetchCoordsByIp};
