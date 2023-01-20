@@ -15,15 +15,33 @@ const fetchMyIP = function(callback) {
   });
 };
 
-const fetchCoordsByIp = function (ip, callback) {
+const fetchCoordsByIp = function(ip, callback) {
   request(`http://ipwho.is/${ip}?fields=latitude,longitude`, (error, response, body) => {
     if (error) {
       return callback(error, null);
+    } else if (!JSON.parse(body).success) {
+      callback('Request failed! Invalid IP address', null);
     } else {
       const coords = JSON.parse(body);
       callback(null, coords);
     }
-  })
-}
+  });
+};
 
-module.exports = {fetchMyIP, fetchCoordsByIp};
+const fetchISSFlyOverTimes = function(coords, callback) {
+  request(`https://iss-flyover.herokuapp.com/json/?lat=${coords.latitude}&lon=${coords.longitude}`, (error, response, body) => {
+    if (error) {
+      return callback(error, null);
+    } else if (response.statusCode !== 200) {
+      const msg = `Status Code ${response.statusCode} when fetching IP. Response: ${body}`;
+      callback(Error(msg), null);
+      return;
+    } else {
+      const flyovers = JSON.parse(body).response;
+      callback(null, flyovers);
+    }
+  });
+};
+
+
+module.exports = {fetchMyIP, fetchCoordsByIp, fetchISSFlyOverTimes};
